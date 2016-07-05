@@ -2,7 +2,7 @@
 Sketch Plugins Cookbook
 =======================
 
-> 强迫自己翻译一些东西，随意性很大，英语一般，翻译肯定不准确，仅为自用
+![学渣乱翻，仅为自用🙃](https://github.com/hbzs/FGP/raw/master/resource/transinfo.png)![感觉会翻完耶😌](https://github.com/hbzs/FGP/raw/master/resource/trans2.png)
 
 Sketch 应用插件开发者的一系列技巧。
 
