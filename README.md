@@ -1,20 +1,25 @@
+
 Sketch Plugins Cookbook
 =======================
 
-A collection of recipes for Sketch App plugins developers.
+> 强迫自己翻译一些东西，随意性很大，英语一般，翻译肯定不准确，仅为自用
 
-I will be posting daily updates in my twitter. Follow me [@turbobabr](https://twitter.com/turbobabr) to stay tuned.
+Sketch 应用插件开发者的一系列技巧。
 
-## CocoaScript: Don't use '===' operator
+我将在 twitter 上发布日常更新，敬请关注 [@turbobabr](https://twitter.com/turbobabr) （作者）。
 
-At first glance CocoaScript seems to be a just fancy name for JavaScript with some syntactic sugar, but in reality many things work differently and it's better to know them.
+## CocoaScript: 不要使用 '===' 操作
+
+首先概览 CocoaScript 像是带些语法糖的取了个花哨名字的 JavaScript，然而事实上许多方面是不一样的，要更好的了解它们。
 
 ![Don't use strict equal operator](./docs/cocoascript_do_not_use_scrict_equal_operator.png)
 
-One of the caveats are `===` and `!==` operators best known as `strict equality` and `strict not equal`. The very brief suggestion about them is:
-- **AVOID USING THEM AT ANY COST IN SKETCH PLUGINS!**
+警告之一是 `===` 和 `!==` 操作符最为人所知的是 `严格相等` 和 `严格不相等` 。对于这个简单的建议是： 
 
-To understand the problem, try to run the following script:
+- **在 SKETCH 插件中尽可能避免使用！**
+
+要理解这个问题，尝试运行下面的脚本：
+
 ```JavaScript
 var strA = "hello!";
 var strB = @"hello!";
@@ -34,7 +39,8 @@ if(strA === strB) {
 // -> "NOT EQUAL!"
 ```
 
-It will produce `true` for `==` operator and `false` for `===`. The string values are equal, both are assigned with `"hello!"` string but their types are different. Now run this script to check their types:
+这里 `==` 为 `true` ， `===` 为 `false` 。字符串的值是相等的，并且都被赋值 `"hello!"` 字符串，然而它们的类型是不同的。现在运行这个脚本检查它们的类型：
+
 ```JavaScript
 function typeOf(obj) {
     print(toString.call(obj));
@@ -50,11 +56,12 @@ typeOf(strB);
 // -> [object MOBoxedObject]
 ```
 
-As you can see, variables `strA` & `strB` are of different types. `strA` is a JavaScript string, but `strB` is a mysterious `MOBoxedObject`. The problem is in definition of `strB` - `@"hello!"` is equal to `NSString.stringWithString("hello!")` and it produces boxed instance of NSString class instead of JS string.
+如你所见，变量 `strA` 和 `strB` 是不同类型。 `strA` 是 JavaScript 字符串类型，而 `strB` 是神秘的 `MOBoxedObject` 类型。问题在于 `strB` 的定义 - `@"hello!"`  相当于 `NSString.stringWithString("hello!")` ，它生成 NSString 类的装箱实例而不是 JS 字符串。
 
-When developing Sketch plugins, you usually deal with the data that is produced on `Sketch Runtime` side. And most of the property getters and class methods return boxed Objective-C objects instead of native JS objects.
+开发 Sketch 插件的时候，你经常处理在 `Sketch 运行时` 的数据。getter 属性和类方法的大部分返回的是装箱的 Objective-C 类，而不是原生 JS 对象。
 
-To demonstrate a real world problem you can easily encounter with: (1) Create a rectangle shape, (2) Select it, (3) Run the following script:
+要演示一个实际问题你能简单地操作：（1）创建一个矩形形状，（2）选中它，（3）运行下面的脚本：
+
 ```JavaScript
 var layer=selection.firstObject();
 if(layer) {
@@ -67,17 +74,18 @@ if(layer) {
 }
 ```
 
-> Note: The usage of `===` and `!==` isn't forbidden, you can use them whenever you want to, but always pay attention to types of variables you compare. It's especially important when you try to port an existing JavaScript library or framework to CocoaScript. But anyway, I insist to forget strict equal/not equal operators and use '==' and '!=' + manual type check if needed.
+> 注意： `===` 和 `!==` 的使用不是禁止的，你能在你想要的任何时候使用它们，但要注意你所比较的类型。 当你尝试移植一个已经存在的 JavaScript 库或框架到 CocoaScript 时这件事尤为重要。无论如何，我坚持忘记严格相等/不相等操作符，使用 '=='和 '!=' + 有必要的话手动类型检查。
 
-## Play Sound
+## 播放声音
 
-Usually sounds bound to commands are annoying and useless, but sometimes they are very helpful when used with care.
+通常声音是令人厌烦且无用的，但有时小心使用的话还是非常有帮助的。
 
 ![Play Sound](./docs/play_sound.png)
 
-Since Sketch plugins have access to all the APIs of [AppKit Framework](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/ObjC_classic/index.html#//apple_ref/doc/uid/20001093), we are able to do really crazy & cool things with plugins.. for example play a `bump!` sound when plugin shows an error message using `-MSDocument.displayMessage:` method to make the message more noticeable to the user.
+因为 Sketch 插件可以使用所有 [AppKit Framework](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/ObjC_classic/index.html#//apple_ref/doc/uid/20001093) 的 API，我们能用插件做足够疯狂且酷的事……例如当插件使用 `-MSDocument.displayMessage:` 方法显示错误信息时播放 `bump!` 声音使得信息能吸引用户更多注意。
 
-To play a sound we can use a simple interface of [NSSound](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/Classes/NSSound_Class/index.html) class. Here is the example how to use it:
+要播放声音我们能使用一个简单的 [NSSound](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/Classes/NSSound_Class/index.html) 类的接口。这是如何使用的例子：
+
 ```JavaScript
 var filePath = sketch.scriptPath.stringByDeletingLastPathComponent()+"/assets/glass.aiff";
 
@@ -86,30 +94,32 @@ doc.displayMessage("I'm Mr Meeseeks LOOK AT ME! :)")
 sound.play();
 ```
 
-> IMPORTANT NOTE: If you want to play audio files located outside of the plugins folder in MAS version of Sketch App, you have to use [sketch-sandbox](https://github.com/bomberstudios/sketch-sandbox) library to authorize access to the files, since this version of Sketch is sandboxed and prohibits access to files located outside of the sandbox.
+> 重要说明：如果你想在 Sketch 应用的 MAS 版本之外的插件文件夹播放声音文件，你必须使用 [sketch-sandbox](https://github.com/bomberstudios/sketch-sandbox) 库来验证文件许可，因为 Sketch 版本是沙盒化的且禁止获取沙盒以外的文件权限。（译者注：该库已停止更新，因为Sketch 已放弃 MAS 版本，所以安装完插件后仅需将 assets 文件夹复制到插件目录即可播放声音）
 
-Complete examples:
+完整例子：
 - [Play Sound.sketchplugin](./Samples/Play Sound.sketchplugin)
 
 
-Works in:
+可工作在：
 - Sketch 3.0 +
 
-## Center Rectangle in Canvas
+## 在画布上居中矩形
 
-To center canvas on a certain point or region, you can use a handy `-(void)MSContentDrawView.centerRect:(GKRect*)rect animated:(BOOL)animated` instance method, where `rect` is a rectangle to be centered, `animated` is a flag that turns on/off animation during the scrolling process.
+要在确定的点或区域居中画布，你能使用一个有用的 `-(void)MSContentDrawView.centerRect:(GKRect*)rect animated:(BOOL)animated` 实例方法，参数 `rect` 是一个被居中的矩形，`animated` 是一个在滚动处理期间打开/关闭动画的标识。
 
 ![Create Custom Shape](./docs/center_rect.png)
 
-The origin and size of the rectangle you provide to this method should be in absolute coordinates.
+你提供给这个方法的矩形原点（origin）和尺寸（size）理应是绝对坐标。
 
-The following example centers viewport by `x:200,y:200` point:
+下面的例子是在 `x:200,y:200` 点居中视图：
+
 ```JavaScript
 var view=doc.currentView();
 var rect=GKRect.rectWithRect(NSMakeRect(200,200,1,1));
 view.centerRect_animated(rect,true);
 ```
-The example below shows how to center a first selected layer using the same method:
+接下来的例子显示了如何使用相同的方法居中首个被选中层：
+
 ```JavaScript
 var layer = selection.firstObject();
 if(layer) {
@@ -118,18 +128,19 @@ if(layer) {
 }
 ```
 
-Works in:
+可工作在：
 - Sketch 3.1 +
 
-## Create Custom Shape
+## 创建自定义形状
 
-To create a custom vector shape programmatically, you have to create an instance of [NSBezierPath](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/Classes/NSBezierPath_Class/index.html) class and draw whatever shape or combination of shapes you want to. Then create a shape group from it using `+(MSShapeGroup*)MSShapeGroup.shapeWithBezierPath:(NSBezierPath*)path` class method.
+要用编程的方式创建一个自定义的矢量图形，你需要创建一个 [NSBezierPath](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/Classes/NSBezierPath_Class/index.html) 类的实例，和画你想要的任何形状或者混合的形状。然后从 `+(MSShapeGroup*)MSShapeGroup.shapeWithBezierPath:(NSBezierPath*)path` 类方法创建形状组。
 
 ![Create Custom Shape](./docs/create_custom_shape.png)
 
-This technique is very similar to creation of custom paths described in previous recipe. The only difference is that you have to close the path before converting it to the shape group.
+这个技巧非常类似于之前的自定义路径创建的技巧，唯一的不同就是在把它转化成形状组前你必须关闭路径。
 
-The following example create a simple arrow shape:
+下面的例子创建了一个简单地箭头形状：
+
 ```JavaScript
 var doc = context.document;
 var path = NSBezierPath.bezierPath();
@@ -149,14 +160,14 @@ fill.color = MSColor.colorWithSVGString("#dd0000");
 doc.currentPage().addLayers([shape]);
 ```
 
-Complete examples:
+完整例子：
 - [Create Custom Shape.sketchplugin](./Samples/Create Custom Shape.sketchplugin)
 
 
-Works in:
+可工作在：
 - Sketch 3.2 +
 
-## Create Line Shape
+## 创建线形
 
 In order to create a line shape programmatically, you have to create an instance of [NSBezierPath](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/Classes/NSBezierPath_Class/index.html) class and add two points to it. Then create a shape group from it using `+(MSShapeGroup*)MSShapeGroup.shapeWithBezierPath:(NSBezierPath*)path` class method.
 
