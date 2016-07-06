@@ -2,7 +2,7 @@
 Sketch Plugins Cookbook
 =======================
 
-![学渣乱翻，仅为自用🙃](https://github.com/hbzs/FGP/raw/master/resource/transinfo.png)![感觉会翻完耶😌](https://github.com/hbzs/FGP/raw/master/resource/trans2.png)
+![学渣乱翻，仅为自用🙃](https://github.com/hbzs/FGP/raw/master/resource/transinfo.png) ![感觉会翻完耶😌](https://github.com/hbzs/FGP/raw/master/resource/trans2.png)
 
 Sketch 应用插件开发者的一系列技巧。
 
@@ -154,7 +154,15 @@ path.lineToPoint(NSMakePoint(10,20));
 path.closePath();
 
 var shape = MSShapeGroup.shapeWithBezierPath(path);
-var fill = shape.style().fills().addNewStylePart();
+//var fill = shape.style().fills().addNewStylePart();
+/* 译者注：fills().addNewStylePart()、borders().addNewStylePart() 类似方法在 Sketch 3.8 中已废弃，新方法：
+layer.style().addStylePartOfType(0) // To add a new fill
+layer.style().addStylePartOfType(1) // To add a new border
+layer.style().addStylePartOfType(2) // To add a new shadow
+layer.style().addStylePartOfType(3) // To add a new inner shadow
+（吐槽：代码不改就算了，官方文档提都没提，起码写个已废弃，要改也成啊，还是在 issue 里提到的邮件列表找到的，有这时间，改个文档很难？我对 Sketch 新的收费规则下急需解决的新旧文档兼容问题深深担忧）
+*/
+var fill = shape.style().addStylePartOfType(0);
 fill.color = MSColor.colorWithSVGString("#dd0000");
 
 doc.currentPage().addLayers([shape]);

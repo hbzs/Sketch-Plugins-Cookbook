@@ -10,7 +10,7 @@
     path.closePath();
 
     var shape = MSShapeGroup.shapeWithBezierPath(path);
-    var fill = shape.style().fills().addNewStylePart();
+    var fill = shape.style().addStylePartOfType(0);
     fill.color = MSColor.colorWithSVGString("#dd0000");
 
     doc.currentPage().addLayers([shape]);
