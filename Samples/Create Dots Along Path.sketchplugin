@@ -4,7 +4,9 @@ if(layer && layer.isKindOfClass(MSShapeGroup)) {
     function createDot(x,y,parent) {
         var radius = 7;
         var shape = MSShapeGroup.shapeWithBezierPath(NSBezierPath.bezierPathWithOvalInRect(NSMakeRect(x-radius/2,y-radius/2,radius,radius)));
-        var fill=shape.style().fills().addNewStylePart();
+        // var fill=shape.style().fills().addNewStylePart();
+        // 译者注：废弃 API 修改
+        var fill=shape.style().addStylePartOfType(0);
 
         var color=MSColor.colorWithSVGString("#dd0000");
         color.alpha = 0.8;

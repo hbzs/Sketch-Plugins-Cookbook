@@ -1,4 +1,5 @@
 (function(){
+    var selection = context.selection;
     var layer=selection.firstObject();
     if(layer && layer.isKindOfClass(MSShapeGroup)) {
 

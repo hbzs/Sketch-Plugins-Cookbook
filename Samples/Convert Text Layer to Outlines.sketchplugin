@@ -13,7 +13,9 @@
         // If text layer doesn't have a fill style, we create it with the color used for the text.
         var style=shape.style();
         if(!style.fill()) {
-            var fill=style.fills().addNewStylePart();
+            // var fill=style.fills().addNewStylePart();
+            // 译者注：废弃 API 修改
+            var fill = style.addStylePartOfType(0);
             fill.color = MSColor.colorWithNSColor(layer.style().textStyle().attributes().NSColor);
         }
 

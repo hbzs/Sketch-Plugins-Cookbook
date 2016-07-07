@@ -2,7 +2,7 @@
 Sketch Plugins Cookbook
 =======================
 
-![学渣乱翻，仅为自用🙃](https://github.com/hbzs/FGP/raw/master/resource/transinfo.png) ![感觉会翻完耶😌](https://github.com/hbzs/FGP/raw/master/resource/trans2.png)
+![学渣乱翻，仅为自用🙃](https://github.com/hbzs/FGP/raw/master/resource/transinfo.png) ![译完打卡😎](https://github.com/hbzs/FGP/raw/master/resource/trans3.png)
 
 Sketch 应用插件开发者的一系列技巧。
 
@@ -78,7 +78,7 @@ if(layer) {
 
 ## 播放声音
 
-通常声音是令人厌烦且无用的，但有时小心使用的话还是非常有帮助的。
+通常声音（sounds bound to commands）是令人厌烦且无用的，但有时小心使用的话还是非常有帮助的。
 
 ![Play Sound](./docs/play_sound.png)
 
@@ -155,12 +155,12 @@ path.closePath();
 
 var shape = MSShapeGroup.shapeWithBezierPath(path);
 //var fill = shape.style().fills().addNewStylePart();
-/* 译者注：fills().addNewStylePart()、borders().addNewStylePart() 类似方法在 Sketch 3.8 中已废弃，新方法：
+/* 译者注：原文档上行代码已不再有效，fills().addNewStylePart()、borders().addNewStylePart() 类似方法在 Sketch 3.8 中已废弃，新方法：
 layer.style().addStylePartOfType(0) // To add a new fill
 layer.style().addStylePartOfType(1) // To add a new border
 layer.style().addStylePartOfType(2) // To add a new shadow
 layer.style().addStylePartOfType(3) // To add a new inner shadow
-（吐槽：代码不改就算了，官方文档提都没提，起码写个已废弃，要改也成啊，还是在 issue 里提到的邮件列表找到的，有这时间，改个文档很难？我对 Sketch 新的收费规则下急需解决的新旧文档兼容问题深深担忧）
+资料来自邮件列表：http://mail.sketchplugins.com/pipermail/dev_sketchplugins.com/2016-May/003781.html
 */
 var fill = shape.style().addStylePartOfType(0);
 fill.color = MSColor.colorWithSVGString("#dd0000");
@@ -177,13 +177,14 @@ doc.currentPage().addLayers([shape]);
 
 ## 创建线形
 
-In order to create a line shape programmatically, you have to create an instance of [NSBezierPath](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/Classes/NSBezierPath_Class/index.html) class and add two points to it. Then create a shape group from it using `+(MSShapeGroup*)MSShapeGroup.shapeWithBezierPath:(NSBezierPath*)path` class method.
+为了以编程方式创建一个线形，你要创建一个 [NSBezierPath](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/Classes/NSBezierPath_Class/index.html) 类的实例并添加两个点，然后使用 `+(MSShapeGroup*)MSShapeGroup.shapeWithBezierPath:(NSBezierPath*)path` 类方法创建一个形状组。
 
 ![Create Line Shape](./docs/create_line_shape.png)
 
-To make Sketch recognize the provided path as a line shape, you have to add only two points using `moveToPoint` & `lineToPoint` methods of `NSBezierPath`.
+要使 Sketch 认出作为线形提供的路径，你仅仅只要使用 `NSBezierPath` 的 `moveToPoint` & `lineToPoint` 方法添加两个点。
 
-The following example creates a simple line shape with two points:
+接下来是用两个点创建一个简单的线形的例子：
+
 ```JavaScript
 var doc = context.document;
 
@@ -192,16 +193,19 @@ path.moveToPoint(NSMakePoint(10,10));
 path.lineToPoint(NSMakePoint(200,200));
 
 var shape = MSShapeGroup.shapeWithBezierPath(path);
-var border = shape.style().borders().addNewStylePart();
+// var border = shape.style().borders().addNewStylePart();
+// 译者注：废弃 API 修改
+var border = shape.style().addStylePartOfType(1);
 border.color = MSColor.colorWithSVGString("#dd0000");
 border.thickness = 2;
 
 doc.currentPage().addLayers([shape]);
 ```
 
-The same way, you can easily create a multi segment line using methods provided by [NSBezierPath](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/Classes/NSBezierPath_Class/index.html) class. Whenever you add more than two points into the path, Sketch treats such shape as a vector path similar to what can be created using standard `V - Vector` tool.
+同样地方法，你能使用 [NSBezierPath](https://developer.apple.com/library/mac/Documentation/Cocoa/Reference/ApplicationKit/Classes/NSBezierPath_Class/index.html) 类提供的方法创建一个多段线。无论何时你添加超过两个点到路径，Sketch 对待矢量路径这样的形状类似于使用标准的 `V - Vector` 工具创建的东西。
 
-The following example demonstrates how to create a curved path with four points:
+接下来的例子演示如何使用四个点创建一条曲线：
+
 ```JavaScript
 var doc = context.document;
 
@@ -212,29 +216,32 @@ path.moveToPoint(NSMakePoint(84.5,161));
 [path curveToPoint:NSMakePoint(3,79.5) controlPoint1:NSMakePoint(39.5,-2) controlPoint2:NSMakePoint(3,34.5)];
 
 var shape = MSShapeGroup.shapeWithBezierPath(path);
-var border = shape.style().borders().addNewStylePart();
+// var border = shape.style().borders().addNewStylePart();
+// 译者注：废弃 API 修改
+var border = shape.style().addStylePartOfType(1);
 border.color = MSColor.colorWithSVGString("#dd0000");
 border.thickness = 2;
 
 doc.currentPage().addLayers([shape]);
 ```
 
-Complete examples:
+完整例子：
 - [Create Line Shape.sketchplugin](./Samples/Create Line Shape.sketchplugin)
 - [Create Curved Line Shape.sketchplugin](./Samples/Create Curved Line Shape.sketchplugin)
 
-Works in:
+工作在：
 - Sketch 3.2 +
 
-## Set Border Radius for Specific Corners
+## 指定角设置圆角半径
 
-Starting from version 3.2 Sketch allows to set custom border radius for specific corner of rectangle shape. It was possible prior to 3.2, but there was no direct API.
+从版本 3.2 开始，Sketch 允许为矩形指定角设置自定义圆角半径，3.2 之前也是可以的，只是没有直接的 API。
 
 ![Set Custom Border Radius](./docs/set_custom_border_radius_for_specific_corner.png)
 
-In order to set custom radiuses you use `-MSRectangleShape.setCornerRadiusFromComponents:(NSString*)compoents` instance method, where `components` is a string that represents radius values for every corner separated by `/` sybmols. The sequence is following: `left-top/right-top/right-bottom/left-bottom`.
+你能使用 `-MSRectangleShape.setCornerRadiusFromComponents:(NSString*)compoents` 实例方法设置自定义半径， `components` 参数表示用 `/` 符号分隔的各个角半径值的字符串，字符串的顺序是：`左上/右上/右下/左下` 。
 
-The following sample sets left-top and right-top corners of a selected rect shape to 15 points:
+接下来的例子设置选中矩形的左上和右上角为 15 点（points）：
+
 ```JavaScript
 var selection = context.selection;
 var layer = selection.firstObject();
@@ -246,24 +253,24 @@ if(layer && layer.isKindOfClass(MSShapeGroup)) {
 }
 ```
 
-Complete examples:
+完整例子：
 - [Set Border Radius From Components.sketchplugin](./Samples/Set Border Radius From Components.sketchplugin)
 
-Works in:
+工作在：
 - Sketch 3.2 +
 
-## Scaling Layers
+## 缩放层
 
-You can scale any layer using `-MSLayer.multiplyBy:(double)scaleFactor` instance method, where `scaleFactor` is a floating-point value that is used to multiple all the layers' properties including position, size, and all the style attributes such as border thickness, shadow, etc. Here are some example scale factors: `1.0 = 100%`, `2.5 = 250%`, `0.5 = 50%`, etc.
+你能使用 `-MSLayer.multiplyBy:(double)scaleFactor` 实例方法缩放任意层， `scaleFactor` 参数是被用于所有层属性（包含 position，size 等）和样式属性（例如 border thickness，shadow等）的倍数。一些缩放因子的例子：`1.0 = 100%`， `2.5 = 250%`， `0.5 = 50%` 等。
 
-This method produces the same result as a standard [Scale](http://bohemiancoding.com/sketch/support/documentation/03-layer-basics/4-resizing-layers.html) tool. Since all the layer type classes are inherited from `MSLayer` class, you can use this method to scale any type of layer including Pages and Artboards.
+这个方法和用标准的 [Scale](http://bohemiancoding.com/sketch/support/documentation/03-layer-basics/4-resizing-layers.html) 工具产生相同的结果，因此所有层类型类都继承自 `MSLayer` 类，你能使用这个方法缩放包括页面和画板在内的任意类型的层。
 
-> Note: After the call of the method, `x` and `y` position values will also be multiplied. If you need the layer to remain in the same position after scaling, you'll have to change its position to the appropriate values.
+> 注意：在方法被调用后，`x` 和 `y` 位置值也将被倍乘。如果你要层在缩放后仍然在同样的位置，你要改变它的位置用合适的值。
 
 ![Finding Selection Bounds](./docs/scale_layers.png)
 
 
-The following sample demonstrates how to scale first selected layer:
+接下来的例子演示如何缩放首个被选中的层：
 ```JavaScript
 var selection = context.selection;
 var layer = selection.firstObject();
@@ -281,16 +288,16 @@ if(layer) {
 }
 ```
 
-Works in:
+工作在：
 - Sketch 3.1 +
 
-## Finding Bounds For a Set of Layers
+## 找到一组层（layer）的边界（bounds）
 
-If you want to quickly find a bounding rectangle for selected layers or any set of layers, there is a very handy class method for that `+(CGRect)MSLayerGroup.groupBoundsForLayers:(NSArray*)layers`. It accepts a list of layers and returns CGRect structure.
+如果你想快速找到选中层或者任意层集合的边界矩形，有个非常便利的方法：`+(CGRect)MSLayerGroup.groupBoundsForLayers:(NSArray*)layers`。它接收一列层且返回 CGRect 结构。
 
 ![Scaling Layers](./docs/find_selection_bounds.png)
 
-A quick sample that demonstrate how to use it:
+一个快速的例子来演示如何使用它：
 ```JavaScript
 var selection = context.selection;
 var bounds=MSLayerGroup.groupBoundsForLayers(selection);
@@ -301,43 +308,45 @@ print("width: "+bounds.size.width);
 print("height: "+bounds.size.height);
 ```
 
-Works in:
+工作在：
 - Sketch 3.3 +
 
-## Create Oval Shape
+## 创建椭圆形
 
-In order to create an oval shape programmatically, you have to create an instance of `MSOvalShape` class, set its frame and wrap with `MSShapeGroup` container.
+为了以编程方式创建一个椭圆形，你要创建一个 `MSOvalShape` 类的实例，设置它的 frame 且用 `MSShapeGroup`容器包裹起来。
 
 ![Create Oval Shape](./docs/create_oval_shape.png)
 
-The following sample demonstrates how to do it:
+接下来的例子来演示如何使用它：
 ```JavaScript
 var doc = context.document;
 var ovalShape = MSOvalShape.alloc().init();
 ovalShape.frame = MSRect.rectWithRect(NSMakeRect(0,0,100,100));
 
 var shapeGroup=MSShapeGroup.shapeWithPath(ovalShape);
-var fill = shapeGroup.style().fills().addNewStylePart();
+// var fill = shapeGroup.style().fills().addNewStylePart();
+// 译者注：废弃 API 修改
+var fill = shapeGroup.style().addStylePartOfType(0);
 fill.color = MSColor.colorWithSVGString("#dd2020");
 
 doc.currentPage().addLayers([shapeGroup]);
 ```
 
-Complete examples:
+完整例子：
 - [Create Oval Shape.sketchplugin](./Samples/Create Oval Shape.sketchplugin)
 
-Works in:
+工作在：
 - Sketch 3.1 +
 
-## Create Shared Style Programmatically
+## 编程方式创建共享样式
 
-In order to create a shared style programmatically you use `-MSSharedLayerStyleContainer.addSharedStyleWithName:(NSString*)name firstInstance:(MSStyle*)style` method, where `name` is a name of shared style being created, `style` is a reference style used as a template for future shared style.
+为了以编程方式创建一个共享样式，你使用 `-MSSharedLayerStyleContainer.addSharedStyleWithName:(NSString*)name firstInstance:(MSStyle*)style` 方法， `name` 是创建共享样式的名字，`style` 是用于要添加的共享样式模板的参考样式。
 
-You can create a shared style from the existing style that is bound to some layer or create it from scratch with a custom `MSStyle` instance.
+你能从绑定到一些层的已存在样式中创建一个共享样式，也能用自定义的 `MSStyle` 实例从头开始创建。
 
 ![Create Shared Style Programmically](./docs/create_shared_style_programmatically.png)
 
-Create shared style from selected layers' style:
+从选中层的样式中创建共享样式：
 ```JavaScript
 var selection = context.selection;
 var doc = context.document;
@@ -348,13 +357,15 @@ if(layer) {
 }
 ```
 
-Create shared style from scratch:
+从头创建共享样式：
 ```JavaScript
 var doc = context.document;
 var sharedStyles=doc.documentData().layerStyles();
 
 var style=MSStyle.alloc().init();
-var fill=style.fills().addNewStylePart();
+// var fill=style.fills().addNewStylePart();
+// 译者注：废弃 API 修改
+var fill = style.addStylePartOfType(0);
 fill.color = MSColor.colorWithSVGString("#B1C151");
 
 sharedStyles.addSharedStyleWithName_firstInstance("Custom Style 2",style);
@@ -362,18 +373,19 @@ sharedStyles.addSharedStyleWithName_firstInstance("Custom Style 2",style);
 doc.reloadInspector();
 ```
 
-Complete examples:
+完整例子：
 - [Create Shared Style From Selected Layer.sketchplugin](./Samples/Create Shared Style From Selected Layer.sketchplugin)
 - [Create Shared Style Programmatically.sketchplugin](./Samples/Create Shared Style Programmatically.sketchplugin)
 
-Works in:
+工作在：
 - Sketch 3.1 +
 
-## Missing 'MSColor.colorWithHex:alpha:'? :)
+## 'MSColor.colorWithHex:alpha:' 方法不见了？ :)
 
-Prior to Sketch 3.2 there was a really nice and handy class method called `MSColor.colorWithHex:alpha:` that allowed to create instance of `MSColor` class with hex string, but unfortunately with the release of Sketch 3.2 version it was removed from the API.
+在 Sketch 3.2 之前有个真的漂亮且便利的 `MSColor.colorWithHex:alpha:` 类方法允许用16进制字符串创建 `MSColor` 类的实例，然而不幸的是在 Sketch 3.2 的正式版中该 API 被移除了。
 
-Good news everyone! The replacement for this method does exist:
+好消息！存在该方法的替代：
+
 ```JavaScript
 // Create color without alpha.
 var color = MSColor.colorWithSVGString("#FF0000");
@@ -387,16 +399,16 @@ print(color);
 // -> (r:1.000000 g:0.000000 b:0.000000 a:0.200000)
 ```
 
-Works in:
+工作在：
 - Sketch 3.0 +
 
-## Flatten Vector Layer
+## 弄平（Flatten）矢量层
 
-If you want to flatten a complex vector layer that contains several sub paths combined using different boolean operations into single layer, you can use `+MSShapeGroup.flatten` method.
+如果你想弄平包含几个使用不同布尔操作到单层的子路径的复杂矢量层，你能用 `+MSShapeGroup.flatten` 方法。
 
 ![Flatten Vector Shape](./docs/flatten_vector_shape.png)
 
-This sample code flattens a first selected vector layer:
+样例代码弄平首个被选中矢量层：
 ```JavaScript
 var selection = context.selection;
 var layer=selection.firstObject();
@@ -405,38 +417,26 @@ if(layer && layer.isKindOfClass(MSShapeGroup)) {
 }
 ```
 
-Complete examples:
+完整例子：
 - [Flatten Vector Layer.sketchplugin](./Samples/Flatten Vector Layer.sketchplugin)
 
-Works in:
+工作在：
 - Sketch 3.2 +
 
 ## Flatten Layers to Bitmap
 
-### Note: This example currently doesn't work in Sketch 3.3 
+### 注意：在 Sketch 3.3 中此样例已不工作
 
-In order to flatten one or several layers of any type to a single `MSBitmapLayer`, use `-MSLayerFlattener.flattenLayers:` method. It accepts one arguments which is an array of layers to be flattened.
+> 译者注：本段已不工作，故未翻
 
-![Flatten Layers to Bitmap](./docs/flatten_layers_to_bitmap.png)
+## 转换文本层为轮廓（Outlines）
 
-The following example flattens all the selected layers to a bitmap layer:
-```JavaScript
-var flattener = MSLayerFlattener.alloc().init();
-flattener.flattenLayers(selection);
-```
-Complete examples:
-- [Flatten Selection to Bitmap.sketchplugin](./Samples/Flatten Selection To Bitmap.sketchplugin)
-
-Works in:
-- Sketch 3.2 +
-
-## Convert Text Layer to Outlines
-
-In order to convert an existing `MSTextLayer` to `MSShapeGroup` layer, you have to get texts' `NSBezierPath` representation and then convert it to a `MSShapeGroup` layer.
+为了转换已存在的 `MSTextLayer` 到 `MSShapeGroup` 层，你要得到文本的 `NSBezierPath` 描述，然后转换为 `MSShapeGroup` 层。
 
 ![Convert Text Layer to Outlines](./docs/convert_text_layer_to_outlines.png)
 
-The following source code demonstrates how to get text layers' vector outline and use it to create a vector shape from it:
+接下来的例子演示如何得到文本层的矢量轮廓并使用它从中创建矢量图形：
+
 ```JavaScript
 function convertToOutlines(layer) {
     if(!layer.isKindOfClass(MSTextLayer)) return;
@@ -447,7 +447,9 @@ function convertToOutlines(layer) {
     shape.style = layer.style();
     var style=shape.style();
     if(!style.fill()) {
-        var fill=style.fills().addNewStylePart();
+        // var fill=style.fills().addNewStylePart();
+        // 译者注：废弃 API 修改
+        var fill = style.addStylePartOfType(0);
         fill.color = MSColor.colorWithNSColor(layer.style().textStyle().attributes().NSColor);
     }
 
@@ -468,21 +470,22 @@ if(layer) {
     print(vectorizedTextLayer);
 }
 ```
-Complete examples:
+完整例子：
 - [Convert Text Layer to Outlines.sketchplugin](./Samples/Convert Text Layer to Outlines.sketchplugin)
 
-Works in:
+工作在：
 - Sketch 3.1 +
 
-## Get Points Coords Along the Shape Path
+## 沿着形状路径获取点坐标
 
-If you want to distribute some shapes along a path there is a convenient method `-pointOnPathAtLength:` implemented in `NSBezierPath_Slopes` class extension.
+如果你要沿着路径分布一些形状，有个实现在 `NSBezierPath_Slopes` 类扩展中的便利方法 `-pointOnPathAtLength:` 。
 
-This method accepts a `double` value that represents a position on path at which you want to get a point coordinate. It returns a `CGPoint` struct with coordinates of the point.
+该方法接收一个表示你想要得到点坐标路径的位置的 `double` 值，它返回一个点坐标的 `CGPoint` 结构。
 
 ![Ge points coords along shape path](./docs/getting_points_along_path.png)
 
-The following example divides shape path into 15 segments and prints out their points coordinates:
+下面的例子把形状路径分割成 15 段，且打印出它们的点坐标：
+
 ```JavaScript
 var selection = context.selection;
 var layer=selection.firstObject();
@@ -498,9 +501,9 @@ if(layer && layer.isKindOfClass(MSShapeGroup)) {
     }
 }
 ```
-Complete examples:
+完整例子：
 - [Get Points Coords Along Path.sketchplugin](./Samples/Get Points Coords Along Path.sketchplugin)
 - [Create Dots Along Path.sketchplugin](./Samples/Create Dots Along Path.sketchplugin)
 
-Works in:
+工作在：
 - Sketch 3.2 +
